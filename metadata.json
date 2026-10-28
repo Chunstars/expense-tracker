@@ -1,0 +1,6 @@
+{
+  "name": "Expense Tracker",
+  "description": "Minimalist Apple-style single-page expense tracker with localStorage persistence, category breakdown, and CSV export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

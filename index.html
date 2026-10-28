@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker — Apple-Style Minimalist Financial Ledger</title>
+    <meta name="description" content="Clean, responsive Apple-style expense tracker with localStorage persistence, category breakdown, and CSV export." />
+    <meta property="og:title" content="Expense Tracker — Apple-Style Minimalist Financial Ledger" />
+    <meta property="og:description" content="Clean, responsive Apple-style expense tracker with localStorage persistence, category breakdown, and CSV export." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    
+    <!-- Link to Stylesheet -->
+    <link rel="stylesheet" href="/src/index.css" />
+
+    <!-- Google Fonts for crisp typography backup -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-[#F5F5F7] text-[#1D1D1F] min-h-screen antialiased selection:bg-[#0071E3]/20 selection:text-[#0071E3]">
+
+    <!-- Toast Notification container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Top Navigation Bar with Interactive Darker Active Overlay Tabs -->
+    <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-black/[0.06] transition-all">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        
+        <!-- Zone 1: Single-element Brand Wordmark -->
+        <a href="#" class="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-[#1D1D1F] whitespace-nowrap shrink-0 group">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#1D1D1F] to-[#3A3A3C] flex items-center justify-center text-white shadow-sm transition-transform duration-200 group-hover:scale-105">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="14" x="2" y="5" rx="3" />
+              <line x1="2" x2="22" y1="10" y2="10" />
+            </svg>
+          </div>
+          <span class="hidden sm:inline">Expense Tracker</span>
+        </a>
+
+        <!-- Zone 2: Navigation Tabs with Interactive Dark Pill Overlay -->
+        <nav id="view-tabs" class="flex items-center p-1 bg-black/[0.05] rounded-xl text-xs sm:text-sm font-medium">
+          <button
+            type="button"
+            data-view="overview"
+            class="nav-tab-btn"
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            data-view="add-expense"
+            class="nav-tab-btn"
+          >
+            Add Expense
+          </button>
+          <button
+            type="button"
+            data-view="expense-history"
+            class="nav-tab-btn"
+          >
+            Expense History
+          </button>
+        </nav>
+
+        <!-- Zone 3: Primary Action (Download CSV) -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="header-download-btn" type="button" class="apple-btn-secondary text-xs sm:text-sm py-2 px-3 sm:px-4 cursor-pointer">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" x2="12" y1="15" y2="3" />
+            </svg>
+            <span class="hidden sm:inline">Download CSV</span>
+            <span class="sm:hidden">CSV</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+      <!-- ========================================== -->
+      <!-- VIEW 1: OVERVIEW                           -->
+      <!-- ========================================== -->
+      <div id="view-overview" class="space-y-6">
+        
+        <!-- Total Spent Counter Hero -->
+        <section class="apple-card p-6 sm:p-8 bg-white relative overflow-hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-black/[0.05]">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold tracking-wider uppercase text-[#86868B]">Total Spent</span>
+                <span class="inline-block w-1 h-1 rounded-full bg-[#86868B]"></span>
+                <span id="expense-count-label" class="text-xs font-medium text-[#86868B] tabular-nums">0 transactions</span>
+              </div>
+              
+              <div class="flex items-baseline gap-3 mt-1.5">
+                <h1 id="total-spent" class="text-5xl sm:text-6xl font-bold tracking-tight text-[#1D1D1F] tabular-nums">
+                  $0.00
+                </h1>
+              </div>
+              <p class="text-xs sm:text-sm text-[#86868B] mt-1.5">
+                Live calculated budget stored securely in your browser's localStorage.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button id="overview-add-btn" type="button" class="apple-btn-primary text-xs sm:text-sm cursor-pointer shadow-sm">
+                <span>+ Add Expense</span>
+              </button>
+              <button id="download-csv-btn" type="button" class="apple-btn-secondary text-xs sm:text-sm cursor-pointer">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" x2="12" y1="15" y2="3" />
+                </svg>
+                <span>Download CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Allocation & Progress Bar -->
+          <div class="pt-6">
+            <div class="flex items-center justify-between text-xs font-semibold text-[#86868B] mb-2.5">
+              <span>Category Allocation</span>
+              <span class="text-[11px] font-normal text-[#86868B]">Food · Transport · Utilities · Others</span>
+            </div>
+
+            <!-- Apple Multi-Segment Progress Bar -->
+            <div class="w-full h-3.5 bg-[#F5F5F7] rounded-full overflow-hidden flex gap-1 p-0.5 border border-black/[0.04]">
+              <div id="bar-food" class="h-full bg-gradient-to-r from-[#FF9500] to-[#FFA726] rounded-full transition-all duration-500" style="width: 0%" title="Food"></div>
+              <div id="bar-transport" class="h-full bg-gradient-to-r from-[#0071E3] to-[#2997FF] rounded-full transition-all duration-500" style="width: 0%" title="Transport"></div>
+              <div id="bar-utilities" class="h-full bg-gradient-to-r from-[#AF52DE] to-[#BF5AF2] rounded-full transition-all duration-500" style="width: 0%" title="Utilities"></div>
+              <div id="bar-others" class="h-full bg-gradient-to-r from-[#8E8E93] to-[#AEAEC2] rounded-full transition-all duration-500" style="width: 0%" title="Others"></div>
+            </div>
+
+            <!-- Category Stats Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-5">
+              <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#FBFBFD] border border-black/[0.04]">
+                <div class="category-glyph glyph-food !w-8 !h-8 !rounded-xl">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                  </svg>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="text-xs text-[#86868B] font-medium">Food</span>
+                  <span id="stat-food" class="text-base font-semibold text-[#1D1D1F] tabular-nums mt-0.5">$0.00</span>
+                  <span id="pct-food" class="text-[11px] text-[#86868B] tabular-nums">0%</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#FBFBFD] border border-black/[0.04]">
+                <div class="category-glyph glyph-transport !w-8 !h-8 !rounded-xl">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                    <path d="M7 17h.01"></path>
+                    <path d="M17 17h.01"></path>
+                  </svg>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="text-xs text-[#86868B] font-medium">Transport</span>
+                  <span id="stat-transport" class="text-base font-semibold text-[#1D1D1F] tabular-nums mt-0.5">$0.00</span>
+                  <span id="pct-transport" class="text-[11px] text-[#86868B] tabular-nums">0%</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#FBFBFD] border border-black/[0.04]">
+                <div class="category-glyph glyph-utilities !w-8 !h-8 !rounded-xl">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="text-xs text-[#86868B] font-medium">Utilities</span>
+                  <span id="stat-utilities" class="text-base font-semibold text-[#1D1D1F] tabular-nums mt-0.5">$0.00</span>
+                  <span id="pct-utilities" class="text-[11px] text-[#86868B] tabular-nums">0%</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#FBFBFD] border border-black/[0.04]">
+                <div class="category-glyph glyph-others !w-8 !h-8 !rounded-xl">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  </svg>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <span class="text-xs text-[#86868B] font-medium">Others</span>
+                  <span id="stat-others" class="text-base font-semibold text-[#1D1D1F] tabular-nums mt-0.5">$0.00</span>
+                  <span id="pct-others" class="text-[11px] text-[#86868B] tabular-nums">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick navigation banner to Expense History -->
+        <div class="apple-card p-6 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-base font-semibold text-[#1D1D1F]">Ready to review your purchases?</h3>
+            <p class="text-xs text-[#86868B] mt-0.5">Switch to the Expense History tab to inspect, filter, or delete transactions.</p>
+          </div>
+          <button id="overview-view-history-btn" type="button" class="apple-btn-secondary text-xs sm:text-sm py-2.5 px-4 cursor-pointer">
+            <span>View Expense History →</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 2: ADD EXPENSE (NO HISTORY TABLE)      -->
+      <!-- ========================================== -->
+      <div id="view-add-expense" class="hidden max-w-2xl mx-auto">
+        <section class="apple-card p-6 sm:p-8 bg-white">
+          <div class="mb-6 pb-4 border-b border-black/[0.06] flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold tracking-tight text-[#1D1D1F]">Log New Expense</h2>
+              <p class="text-xs text-[#86868B] mt-0.5">Add a new item to your budget ledger.</p>
+            </div>
+            <button id="add-sample-btn" type="button" class="hover:text-[#0071E3] text-xs font-medium transition-colors cursor-pointer">
+              + Load Samples
+            </button>
+          </div>
+
+          <form id="expense-form" class="space-y-5" novalidate>
+            <!-- Input Field: Item Name -->
+            <div>
+              <label for="item-name" class="block text-xs font-semibold text-[#1D1D1F] mb-1.5">
+                Item Name <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="item-name"
+                name="itemName"
+                class="apple-input"
+                placeholder="e.g. Grocery Store, Coffee, Subway"
+                maxlength="80"
+                required
+                autocomplete="off"
+              />
+              <span id="error-item-name" class="text-[11px] text-red-500 hidden mt-1">Please enter an item name.</span>
+            </div>
+
+            <!-- Input Field: Amount ($) with FIXED, NON-OVERLAPPING PREFIX -->
+            <div>
+              <label for="amount" class="block text-xs font-semibold text-[#1D1D1F] mb-1.5">
+                Amount ($) <span class="text-red-500">*</span>
+              </label>
+              <!-- Integrated Apple Prefix Container: Dollar sign is physically separated from input text! -->
+              <div class="flex rounded-xl border border-black/15 bg-[#FBFBFD] overflow-hidden focus-within:border-[#0071E3] focus-within:ring-4 focus-within:ring-[#0071E3]/15 transition-all">
+                <div class="px-3.5 flex items-center justify-center bg-black/[0.04] text-[#1D1D1F] font-semibold text-sm border-r border-black/10 select-none">
+                  $
+                </div>
+                <input
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  class="w-full bg-transparent px-3.5 py-3 text-base text-[#1D1D1F] tabular-nums outline-none"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0.01"
+                  max="1000000"
+                  required
+                />
+              </div>
+              <span id="error-amount" class="text-[11px] text-red-500 hidden mt-1">Please enter a valid amount greater than 0.</span>
+            </div>
+
+            <!-- Dropdown: Category (Food, Transport, Utilities, Others) -->
+            <div>
+              <label for="category" class="block text-xs font-semibold text-[#1D1D1F] mb-1.5">
+                Category <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <select id="category" name="category" class="apple-input pr-10 appearance-none bg-[#FBFBFD] cursor-pointer" required>
+                  <option value="" disabled selected>Select category</option>
+                  <option value="Food">Food</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Utilities">Utilities</option>
+                  <option value="Others">Others</option>
+                </select>
+                <div class="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#86868B]">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <span id="error-category" class="text-[11px] text-red-500 hidden mt-1">Please select an expense category.</span>
+            </div>
+
+            <!-- Optional Date input -->
+            <div>
+              <label for="expense-date" class="block text-xs font-semibold text-[#1D1D1F] mb-1.5">
+                Date
+              </label>
+              <input
+                type="date"
+                id="expense-date"
+                name="expenseDate"
+                class="apple-input cursor-pointer"
+              />
+            </div>
+
+            <!-- Log Expense Button -->
+            <button
+              type="submit"
+              id="log-expense-btn"
+              class="apple-btn-primary w-full py-3.5 text-sm font-semibold tracking-wide shadow-sm cursor-pointer"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Log Expense</span>
+            </button>
+          </form>
+
+          <div class="mt-6 pt-4 border-t border-black/[0.05] flex items-center justify-between text-xs text-[#86868B]">
+            <span>Want to see logged transactions?</span>
+            <button id="form-go-history-btn" type="button" class="text-[#0071E3] hover:underline font-medium cursor-pointer">
+              Go to Expense History →
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 3: EXPENSE HISTORY (NO LOG FORM)       -->
+      <!-- ========================================== -->
+      <div id="view-expense-history" class="hidden space-y-6">
+        <section class="apple-card p-6 sm:p-8 bg-white">
+          
+          <!-- History Header with Record Count & Download CSV -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-5 border-b border-black/[0.06]">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h2 class="text-xl font-bold tracking-tight text-[#1D1D1F]">History of Logged Expenses</h2>
+                <span id="history-badge-count" class="px-2.5 py-0.5 rounded-full bg-[#F5F5F7] text-xs font-semibold text-[#86868B] tabular-nums">
+                  0 records
+                </span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">
+                Interactive table display of all logged expenses stored in localStorage.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+              <button id="table-download-btn" type="button" class="apple-btn-primary text-xs py-2 px-3.5 cursor-pointer shadow-sm">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" x2="12" y1="15" y2="3" />
+                </svg>
+                <span>Download CSV</span>
+              </button>
+
+              <button id="clear-all-btn" type="button" class="apple-btn-secondary text-xs py-2 px-3 hover:text-red-600 hover:border-red-200 cursor-pointer" title="Delete all expenses">
+                <svg class="w-3.5 h-3.5 text-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+                <span>Clear All</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Filter Tabs -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div class="flex items-center gap-1 p-1 bg-[#F5F5F7] rounded-xl overflow-x-auto max-w-full">
+              <button type="button" data-filter="All" class="category-filter-btn px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all bg-white text-[#1D1D1F] shadow-sm cursor-pointer whitespace-nowrap">
+                All Expenses
+              </button>
+              <button type="button" data-filter="Food" class="category-filter-btn px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all text-[#86868B] hover:text-[#1D1D1F] cursor-pointer whitespace-nowrap">
+                Food
+              </button>
+              <button type="button" data-filter="Transport" class="category-filter-btn px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all text-[#86868B] hover:text-[#1D1D1F] cursor-pointer whitespace-nowrap">
+                Transport
+              </button>
+              <button type="button" data-filter="Utilities" class="category-filter-btn px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all text-[#86868B] hover:text-[#1D1D1F] cursor-pointer whitespace-nowrap">
+                Utilities
+              </button>
+              <button type="button" data-filter="Others" class="category-filter-btn px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all text-[#86868B] hover:text-[#1D1D1F] cursor-pointer whitespace-nowrap">
+                Others
+              </button>
+            </div>
+            <span id="filtered-count-label" class="text-xs text-[#86868B] tabular-nums shrink-0">Showing 0 entries</span>
+          </div>
+
+          <!-- The Table of Logged Expenses -->
+          <div class="overflow-x-auto rounded-2xl border border-black/[0.06]">
+            <table id="expense-table" class="w-full text-left apple-table">
+              <thead class="bg-[#FBFBFD]">
+                <tr>
+                  <th scope="col" class="w-5/12">Item Name</th>
+                  <th scope="col" class="w-3/12">Category</th>
+                  <th scope="col" class="w-2/12">Date</th>
+                  <th scope="col" class="w-2/12 text-right">Amount ($)</th>
+                  <th scope="col" class="w-12 text-center" aria-label="Actions"></th>
+                </tr>
+              </thead>
+              <tbody id="expense-table-body" class="divide-y divide-black/[0.04]">
+                <!-- Rows injected dynamically via vanilla JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-[#86868B] mt-4 px-1">
+            <span>Synced automatically to localStorage</span>
+            <span class="text-[11px]">Real-time offline ledger</span>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <!-- Clear All Confirmation Modal -->
+    <div id="clear-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 hidden transition-opacity">
+      <div class="apple-card max-w-sm w-full p-6 bg-white shadow-2xl space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-semibold text-[#1D1D1F]">Clear All Expenses?</h3>
+            <p class="text-xs text-[#86868B] mt-0.5">This action cannot be undone. All entries will be removed from localStorage.</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button id="cancel-clear-btn" type="button" class="apple-btn-secondary text-xs cursor-pointer">Cancel</button>
+          <button id="confirm-clear-btn" type="button" class="apple-btn-primary bg-red-600 hover:bg-red-700 text-xs text-white cursor-pointer">Delete All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script entry point -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

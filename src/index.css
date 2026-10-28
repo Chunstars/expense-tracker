@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --apple-canvas: #f5f5f7;
+    --apple-card: #ffffff;
+    --apple-text-primary: #1d1d1f;
+    --apple-text-secondary: #86868b;
+    --apple-text-tertiary: #a1a1a6;
+    --apple-border: rgba(0, 0, 0, 0.08);
+    --apple-border-subtle: rgba(0, 0, 0, 0.04);
+    --apple-blue: #0071e3;
+    --apple-blue-hover: #0077ed;
+    --apple-blue-subtle: rgba(0, 113, 227, 0.08);
+  }
+
+  body {
+    background-color: #f5f5f7;
+    color: #1d1d1f;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+}
+
+/* Apple Card Container Styling */
+.apple-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 24px;
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.04), 0 1px 4px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-card:hover {
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.06), 0 2px 8px -1px rgba(0, 0, 0, 0.02);
+}
+
+/* Apple Input Controls */
+.apple-input {
+  background: #fbfbfd;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 15px;
+  color: #1d1d1f;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  width: 100%;
+}
+
+.apple-input:focus {
+  background: #ffffff;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.14);
+}
+
+/* Apple Primary Button */
+.apple-btn-primary {
+  background: #1d1d1f;
+  color: #ffffff !important;
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.apple-btn-primary:hover {
+  background: #333336;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.apple-btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Apple Secondary / Frosted Button */
+.apple-btn-secondary {
+  background: #ffffff;
+  color: #1d1d1f;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.apple-btn-secondary:hover {
+  background: #f5f5f7;
+  border-color: rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.apple-btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Navigation Segmented Tab Buttons */
+.nav-tab-btn {
+  padding: 7px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #86868b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nav-tab-btn:hover {
+  color: #1d1d1f;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Active Pressed Tab Style: Darker Overlay with Permanent Pure White Text */
+.nav-tab-btn.active {
+  background: #1d1d1f !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+
+/* On hover over the active tab, text remains strictly PURE WHITE */
+.nav-tab-btn.active:hover {
+  background: #2c2c2e !important;
+  color: #ffffff !important;
+}
+
+/* Category Badges with Apple squircle glyph */
+.category-glyph {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.glyph-food {
+  background: rgba(255, 149, 0, 0.12);
+  color: #ff9500;
+}
+
+.glyph-transport {
+  background: rgba(0, 113, 227, 0.12);
+  color: #0071e3;
+}
+
+.glyph-utilities {
+  background: rgba(175, 82, 222, 0.12);
+  color: #af52de;
+}
+
+.glyph-others {
+  background: rgba(142, 142, 147, 0.12);
+  color: #636366;
+}
+
+/* Apple Table Layout */
+.apple-table th {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #86868b;
+  letter-spacing: 0.04em;
+  padding: 14px 20px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-table td {
+  padding: 16px 20px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  vertical-align: middle;
+}
+
+.apple-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.apple-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.015);
+}
+
+.apple-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Tabular figures for numbers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
